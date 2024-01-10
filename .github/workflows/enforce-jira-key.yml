@@ -13,7 +13,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Enforce Jira Key
+    - name: Enforce Jira
       run: |
         for commit in $(git rev-list ${{ github.event.before }}..${{ github.sha }}); do
           if ! git log --format=%B -n 1 $commit | grep -qE '([A-Z]{1,10}-[0-9]+)'; then
