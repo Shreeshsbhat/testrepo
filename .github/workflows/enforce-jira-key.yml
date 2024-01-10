@@ -1,23 +1,12 @@
-name: Enforce Jira Key in Commit Message
-
-on:
-  push:
-    branches:
-      - main  # Change this to your main branch
+on: [push]
 
 jobs:
-  enforce-jira-key:
+  commit-message-check-job:
     runs-on: ubuntu-latest
-
+    name: commit-message-validation
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Enforce Jira
-      run: |
-        for commit in $(git rev-list ${{ github.event.before }}..${{ github.sha }}); do
-          if ! git log --format=%B -n 1 $commit | grep -qE '([A-Z]{1,10}-[0-9]+)'; then
-            echo "ERROR: Commit message in commit $commit does not contain a valid Jira key."
-            exit 1
-          fi
-        done
+      - uses: actions/checkout@v3
+      - id: foo
+        uses: uptownaravi/verify-commit-message-action@v2
+        with:
+          regex: '(?i)jira-[0-9]{3,}'
