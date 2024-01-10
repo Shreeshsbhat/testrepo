@@ -1,12 +1,24 @@
-on: [push]
+name: Enforce Jira Key in Pull Request Message
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
 
 jobs:
-  commit-message-check-job:
+  enforce-jira-key:
     runs-on: ubuntu-latest
-    name: commit-message-validation
+
     steps:
-      - uses: actions/checkout@v3
-      - id: foo
-        uses: uptownaravi/verify-commit-message-action@v2
-        with:
-          regex: '(?i)jira-[0-9]{3,}'
+    - name: Check Jira Key in Pull Request Message
+      run: |
+        pull_request_message=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                            -H "Accept: application/vnd.github.v3+json" \
+                            ${{ github.api_url }}/repos/${{ github.repository }}/pulls/${{ github.event.number }} | \
+                            jq -r '.body')
+
+        if [[ ! "$pull_request_message" =~ [A-Z]{1,10}-[0-9]+ ]]; then
+          echo "ERROR: Pull request message does not contain a valid Jira key."
+          exit 1
+        fi
